@@ -249,15 +249,22 @@ def main():
         if compression_scheduler:
             compression_scheduler.on_epoch_begin(epoch)
 
+
         # Train for one epoch
         with collectors_context(activations_collectors["train"]) as collectors:
             train(train_loader, model, criterion, optimizer, epoch, compression_scheduler,
-                  loggers=[tflogger, pylogger], args=args)
+                 loggers=[tflogger, pylogger], args=args)
             distiller.log_weights_sparsity(model, epoch, loggers=[tflogger, pylogger])
+            t, total = distiller.weights_sparsity_tbl_summary(model, return_total_sparsity=True)
+            #omer edit
+            sparout = open('sparsity.txt', 'w')
+            sparout.write(str(total))
+            sparout.close()
             distiller.log_activation_statsitics(epoch, "train", loggers=[tflogger],
                                                 collector=collectors["sparsity"])
             if args.masks_sparsity:
                 msglogger.info(distiller.masks_sparsity_tbl_summary(model, compression_scheduler))
+
 
         # evaluate on validation set
         with collectors_context(activations_collectors["valid"]) as collectors:
@@ -273,6 +280,8 @@ def main():
         distiller.log_training_progress(stats, None, epoch, steps_completed=0, total_steps=1, log_freq=1,
                                         loggers=[tflogger])
 
+        #test(test_loader, model, criterion, [pylogger], activations_collectors, args=args)
+
         if compression_scheduler:
             compression_scheduler.on_epoch_end(epoch, optimizer)
 
@@ -283,7 +292,22 @@ def main():
                                  perf_scores_history[0].top1, is_best, args.name, msglogger.logdir)
 
     # Finally run results on the test set
-    test(test_loader, model, criterion, [pylogger], activations_collectors, args=args)
+    #omer edit
+    top1,top5,bla = test(test_loader, model, criterion, [pylogger], activations_collectors, args=args)
+    testout = open('top1.txt','w')
+    testout.write(str(top1))
+    testout.close()
+
+    #omer edit
+    pathfile = open('checkpoint_path.txt','w')
+    pathfile.write(msglogger.logdir)
+    pathfile.close()
+
+    dfile = open('done.txt', 'w')
+    dfile.write('1')
+    dfile.close()
+
+
 
 
 OVERALL_LOSS_KEY = 'Overall Loss'
@@ -324,6 +348,7 @@ def train(train_loader, model, criterion, optimizer, epoch,
         # Execute the forward phase, compute the output and measure loss
         if compression_scheduler:
             compression_scheduler.on_minibatch_begin(epoch, train_step, steps_per_epoch, optimizer)
+            #compression_scheduler.on_epoch_begin()
 
         if not hasattr(args, 'kd_policy') or args.kd_policy is None:
             output = model(inputs)
@@ -394,6 +419,7 @@ def train(train_loader, model, criterion, optimizer, epoch,
                                             steps_per_epoch, args.print_freq,
                                             loggers)
         end = time.time()
+        #break '''Omer Edit'''
     return acc_stats
 
 

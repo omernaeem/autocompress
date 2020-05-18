@@ -1,0 +1,22 @@
+version: 1
+
+lr_schedulers:
+  pruning_lr:
+    class: ExponentialLR
+    gamma: 0.98
+extensions:
+  net_thinner:
+    class: FilterRemover
+    thinning_func_str: remove_filters
+    arch: 'plain20_cifar'
+    dataset: 'cifar10'
+policies:
+
+  - lr_scheduler:
+      instance_name: pruning_lr
+    starting_epoch: 173
+    ending_epoch: 500
+    frequency: 1
+  - extension:
+      instance_name : net_thinner
+    epochs: [191]

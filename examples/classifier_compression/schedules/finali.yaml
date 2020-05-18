@@ -1,0 +1,93 @@
+version: 1
+pruners:
+  layer0_pruner:
+    class: 'AutomatedGradualPruner'
+    initial_sparsity : 0.2110770755699069
+    final_sparsity : 0.2130770755699069
+    weights: ['features.module.0.weight']
+  layer1_pruner:
+    class: 'AutomatedGradualPruner'
+    initial_sparsity : 0.18964574551971355
+    final_sparsity : 0.19964574551971355
+    weights: ['features.module.3.weight']
+  layer2_pruner:
+    class: 'AutomatedGradualPruner'
+    initial_sparsity : 0.20700581377871938
+    final_sparsity : 0.21700581377871938
+    weights: ['features.module.6.weight']
+  layer3_pruner:
+    class: 'AutomatedGradualPruner'
+    initial_sparsity : 0.2001
+    final_sparsity : 0.2101
+    weights: ['features.module.8.weight']
+  layer4_pruner:
+    class: 'AutomatedGradualPruner'
+    initial_sparsity : 0.21407012574013184
+    final_sparsity : 0.22407012574013184
+    weights: ['features.module.10.weight']
+  layer5_pruner:
+    class: 'AutomatedGradualPruner'
+    initial_sparsity : 0.4917760122875254
+    final_sparsity : 0.5017760122875254
+    weights: ['classifier.1.weight']
+  layer6_pruner:
+    class: 'AutomatedGradualPruner'
+    initial_sparsity : 0.1855200935639567
+    final_sparsity : 0.1955200935639567
+    weights: ['classifier.4.weight']
+  layer7_pruner:
+    class: 'AutomatedGradualPruner'
+    initial_sparsity : 0.1693094866522306
+    final_sparsity : 0.1793094866522306
+    weights: ['classifier.6.weight']
+lr_schedulers:
+  pruning_lr:
+    class: StepLR
+    step_size: 40
+    gamma: 0.2
+policies:
+  - pruner:
+      instance_name : 'layer0_pruner'
+    starting_epoch: 0
+    ending_epoch: 2
+    frequency: 1
+  - pruner:
+      instance_name : 'layer1_pruner'
+    starting_epoch: 0
+    ending_epoch: 2
+    frequency: 1
+  - pruner:
+      instance_name : 'layer2_pruner'
+    starting_epoch: 0
+    ending_epoch: 2
+    frequency: 1
+  - pruner:
+      instance_name : 'layer3_pruner'
+    starting_epoch: 0
+    ending_epoch: 2
+    frequency: 1
+  - pruner:
+      instance_name : 'layer4_pruner'
+    starting_epoch: 0
+    ending_epoch: 2
+    frequency: 1
+  - pruner:
+      instance_name : 'layer5_pruner'
+    starting_epoch: 0
+    ending_epoch: 2
+    frequency: 1
+  - pruner:
+      instance_name : 'layer6_pruner'
+    starting_epoch: 0
+    ending_epoch: 2
+    frequency: 1
+  - pruner:
+      instance_name : 'layer7_pruner'
+    starting_epoch: 0
+    ending_epoch: 2
+    frequency: 1
+  - lr_scheduler:
+      instance_name: pruning_lr
+    starting_epoch: 0
+    ending_epoch: 500
+    frequency: 1

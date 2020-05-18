@@ -32,6 +32,7 @@ import torch.optim
 import distiller
 from .summary_graph import SummaryGraph
 from .data_loggers import PythonLogger, CsvLogger
+import numpy as np
 
 msglogger = logging.getLogger()
 
@@ -78,6 +79,24 @@ def model_summary(model, what, dataset=None):
     else:
         raise ValueError("%s is not a supported summary type" % what)
 
+def zeroes_storage_req(tensor):
+
+    w = np.array(tensor.cpu().flatten())
+
+    wnz = np.array(w.nonzero()) + 1
+
+    wnzs = np.insert(wnz, 0, 0)[:-1]
+
+    spans = wnz - wnzs
+
+    zs =[]
+
+    for c in range(1, 9):
+        zs.append(np.sum(np.floor((spans - 1) / (2 ** c))))
+
+    return zs
+
+
 
 def weights_sparsity_summary(model, return_total_sparsity=False, param_dims=[2, 4]):
     df = pd.DataFrame(columns=['Name', 'Shape', 'NNZ (dense)', 'NNZ (sparse)',
@@ -86,10 +105,14 @@ def weights_sparsity_summary(model, return_total_sparsity=False, param_dims=[2, 
     pd.set_option('precision', 2)
     params_size = 0
     sparse_params_size = 0
+    # omer edit
+    f = open('model_details.txt','w')
     for name, param in model.state_dict().items():
         # Extract just the actual parameter's name, which in this context we treat as its "type"
         if param.dim() in param_dims and any(type in name for type in ['weight', 'bias']):
+
             _density = distiller.density(param)
+            zs = zeroes_storage_req(param)
             params_size += torch.numel(param)
             sparse_params_size += param.numel() * _density
             df.loc[len(df.index)] = ([
@@ -107,8 +130,12 @@ def weights_sparsity_summary(model, return_total_sparsity=False, param_dims=[2, 
                 param.mean().item(),
                 param.abs().mean().item()
             ])
+            f.write(name + ',' + str(torch.numel(param)) + ',' + str((1 - _density) * 100) + ',' + str(zs)[1:-1] + '\n')
 
     total_sparsity = (1 - sparse_params_size/params_size)*100
+
+    f.close()
+    #omer edit end
 
     df.loc[len(df.index)] = ([
         'Total sparsity:',

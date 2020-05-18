@@ -1,0 +1,79 @@
+#python3 compress_classifier.py -a simplenet_cifar ../../../data.cifar10 -p 30 -j=4 --lr=0.01 --out-dir logs/agp75/ --compress=schedules/agp75.yaml --resume logs/simplenet_baseline/2019.03.10-200700/best.pth.tar --epochs 1
+version: 1
+pruners:
+  fc1_pruner:
+    class: 'AutomatedGradualPruner'
+    initial_sparsity : 0.75
+    final_sparsity: 0.751
+    weights: ['module.fc1.weight']
+
+  fc2_pruner:
+    class: 'AutomatedGradualPruner'
+    initial_sparsity : 0.75
+    final_sparsity: 0.751
+    weights: ['module.fc2.weight']
+ 
+  fc3_pruner:
+    class: 'AutomatedGradualPruner'
+    initial_sparsity : 0.75
+    final_sparsity: 0.751
+    weights: ['module.fc3.weight']
+
+
+  conv1_pruner:
+    class: 'AutomatedGradualPruner'
+    initial_sparsity : 0.75
+    final_sparsity: 0.751
+    weights: ['module.conv1.weight']
+
+  conv2_pruner:
+    class: 'AutomatedGradualPruner'
+    initial_sparsity : 0.75
+    final_sparsity: 0.751
+    weights: ['module.conv2.weight']
+
+
+lr_schedulers:
+  # Learning rate decay scheduler
+   pruning_lr:
+     class: StepLR
+     step_size: 20
+     gamma: 0.2
+
+
+policies:
+  - pruner:
+      instance_name : 'conv1_pruner'
+    starting_epoch: 0
+    ending_epoch: 130
+    frequency: 1
+
+  - pruner:
+      instance_name : 'conv2_pruner'
+    starting_epoch: 0
+    ending_epoch: 130
+    frequency: 1
+
+  - pruner:
+      instance_name : 'fc1_pruner'
+    starting_epoch: 0
+    ending_epoch: 130
+    frequency: 1
+
+  - pruner:
+      instance_name : 'fc2_pruner'
+    starting_epoch: 0
+    ending_epoch: 130
+    frequency: 1
+
+  - pruner:
+      instance_name: 'fc3_pruner'
+    starting_epoch: 0
+    ending_epoch: 130
+    frequency: 1
+
+  - lr_scheduler:
+      instance_name: pruning_lr
+    starting_epoch: 0
+    ending_epoch: 500
+    frequency: 1

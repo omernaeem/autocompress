@@ -1,0 +1,51 @@
+#time python3 compress_classifier.py -a simplenet_cifar ../../../data.cifar10 -p 30 -j=4 --lr=0.1 --out-dir logs/baseline/ --compress=schedules/simplenetBaseline.yaml --epochs 110
+
+#Parameters:
+#+----+---------------------+---------------+---------------+----------------+------------+------------+----------+----------+----------+------------+---------+----------+------------+
+#|    | Name                | Shape         |   NNZ (dense) |   NNZ (sparse) |   Cols (%) |   Rows (%) |   Ch (%) |   2D (%) |   3D (%) |   Fine (%) |     Std |     Mean |   Abs-Mean |
+#|----+---------------------+---------------+---------------+----------------+------------+------------+----------+----------+----------+------------+---------+----------+------------|
+#|  0 | module.conv1.weight | (6, 3, 5, 5)  |           450 |            450 |    0.00000 |    0.00000 |  0.00000 |  0.00000 |  0.00000 |    0.00000 | 0.52083 |  0.00260 |    0.36265 |
+#|  1 | module.conv2.weight | (16, 6, 5, 5) |          2400 |           2400 |    0.00000 |    0.00000 |  0.00000 |  0.00000 |  0.00000 |    0.00000 | 0.25628 | -0.01973 |    0.18307 |
+#|  2 | module.fc1.weight   | (120, 400)    |         48000 |          48000 |    0.00000 |    0.00000 |  0.00000 |  0.00000 |  0.00000 |    0.00000 | 0.10428 | -0.01151 |    0.08080 |
+#|  3 | module.fc2.weight   | (84, 120)     |         10080 |          10080 |    0.00000 |    0.00000 |  0.00000 |  0.00000 |  0.00000 |    0.00000 | 0.09528 | -0.02236 |    0.07767 |
+#|  4 | module.fc3.weight   | (10, 84)      |           840 |            840 |    0.00000 |    0.00000 |  0.00000 |  0.00000 |  0.00000 |    0.00000 | 0.12837 | -0.00011 |    0.10397 |
+#|  5 | Total sparsity:     | -             |         61770 |          61770 |    0.00000 |    0.00000 |  0.00000 |  0.00000 |  0.00000 |    0.00000 | 0.00000 |  0.00000 |    0.00000 |
+#+----+---------------------+---------------+---------------+----------------+------------+------------+----------+----------+----------+------------+---------+----------+------------+
+#Total sparsity: 0.00
+
+#--- validate (epoch=119)-----------
+#5000 samples (256 per mini-batch)
+#==> Top1: 71.440    Top5: 97.280    Loss: 0.823
+
+#==> Best [Top1: 72.100   Top5: 97.480   Sparsity:0.00   Params: 61770 on epoch: 96]
+#Saving checkpoint to: logs/baseline/2019.04.01-203750/checkpoint.pth.tar
+#--- test ---------------------
+#10000 samples (256 per mini-batch)
+#Test: [   30/   39]    Loss 0.762646    Top1 73.645833    Top5 97.825521    
+#==> Top1: 73.700    Top5: 97.770    Loss: 0.759
+
+
+#Log file for this run: /home/omer/distiller/examples/classifier_compression/logs/baseline/2019.04.01-203750/2019.04.01-203750.log
+
+#real	6m36.588s
+#user	20m16.368s
+#sys	2m40.427s
+
+
+version: 1
+
+lr_schedulers:
+  # Learning rate decay scheduler
+   pruning_lr:
+     class: StepLR
+     step_size: 30
+     gamma: 0.2
+
+
+policies:
+
+  - lr_scheduler:
+      instance_name: pruning_lr
+    starting_epoch: 0
+    ending_epoch: 500
+    frequency: 1

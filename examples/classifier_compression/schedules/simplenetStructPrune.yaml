@@ -1,0 +1,80 @@
+#time python3 compress_classifier.py -a simplenet_cifar ../../../data.cifar10 -p 30 -j=4 --lr=0.01 --out-dir logs/simplenetStructPrune/ --compress=schedules/simplenetStructPrune.yaml --resume logs/baseline/2019.04.01-203750/best.pth.tar --epochs 1
+version: 1
+pruners:
+  fc1_pruner:
+    class: 'L1RankedStructureParameterPruner'
+    group_type: Rows
+    desired_sparsity: 0.7
+    weights: ['module.fc1.weight']
+
+  fc2_pruner:
+    class: 'L1RankedStructureParameterPruner'
+    group_type: Rows
+    desired_sparsity: 0.7
+    weights: ['module.fc2.weight']
+ 
+  fc3_pruner:
+    class: 'L1RankedStructureParameterPruner'
+    group_type: Rows
+    desired_sparsity: 0.7
+    weights: ['module.fc3.weight']
+
+
+  conv1_pruner:
+    class: 'L1RankedStructureParameterPruner'
+    group_type: Filters
+    desired_sparsity: 0.7
+    weights: ['module.conv1.weight']
+
+  conv2_pruner:
+    class: 'L1RankedStructureParameterPruner'
+    group_type: Filters
+    desired_sparsity: 0.7
+    weights: ['module.conv2.weight']
+
+#extensions:
+#  net_thinner:
+#      class: 'FilterRemover'
+#      thinning_func_str: remove_filters
+#      arch: 'simplenet_cifar'
+#      dataset: 'cifar10'
+
+
+lr_schedulers:
+  # Learning rate decay scheduler
+   pruning_lr:
+     class: StepLR
+     step_size: 20
+     gamma: 0.2
+
+
+policies:
+  - pruner:
+      instance_name : 'conv1_pruner'
+    epochs : [97]
+
+  - pruner:
+      instance_name : 'conv2_pruner'
+    epochs : [97]
+
+  - pruner:
+      instance_name : 'fc1_pruner'
+    epochs : [97]
+
+  - pruner:
+      instance_name : 'fc2_pruner'
+    epochs : [97]
+
+  - pruner:
+      instance_name: 'fc3_pruner'
+    epochs : [97]
+
+#  - extension:
+#      instance_name: 'net_thinner'
+#    epochs : [97]
+
+  - lr_scheduler:
+      instance_name: pruning_lr
+    starting_epoch: 0
+    ending_epoch: 500
+    frequency: 1
